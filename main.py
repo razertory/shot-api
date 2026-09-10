@@ -107,7 +107,6 @@ class ShotRequest(BaseModel):
     scale_factor: Optional[float] = Field(None, gt=0, le=4, description="缩放倍数")
     user_agent: Optional[str] = Field(None, description="自定义 User-Agent")
     timeout: int = Field(30, ge=5, le=120, description="整体超时秒数")
-    key_prefix: str = Field("shots", pattern=r"^[a-zA-Z0-9_\-/]+$", max_length=100, description="R2 对象 key 前缀")
 
 
 class ShotResponse(BaseModel):
@@ -117,8 +116,8 @@ class ShotResponse(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "url": "https://cdn.example.com/shots/2026/09/10/ab12cd.png",
-                    "key": "shots/2026/09/10/ab12cd.png",
+                    "url": "https://cdn.example.com/shot_api/2026/09/10/ab12cd.png",
+                    "key": "shot_api/2026/09/10/ab12cd.png",
                     "content_type": "image/png",
                     "size_bytes": 263816,
                     "duration_ms": 2100,
@@ -198,7 +197,7 @@ async def shot(req: ShotRequest):
         raise HTTPException(status_code, detail={"error": str(e), "stderr": e.stderr})
 
     try:
-        url, key, size = await upload(result.file_path, settings, prefix=req.key_prefix)
+        url, key, size = await upload(result.file_path, settings, prefix="shot_api")
     except Exception as e:
         log.exception("R2 upload failed")
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail={"error": f"R2 upload failed: {e}"})

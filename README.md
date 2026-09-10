@@ -23,8 +23,7 @@ Header: `Authorization: Bearer $API_KEY`
   "retina": true,           // 2x
   "scale_factor": 1.5,
   "user_agent": "...",
-  "timeout": 30,            // 秒
-  "key_prefix": "shots"     // R2 key 前缀
+  "timeout": 30            // 秒
 }
 ```
 
@@ -32,8 +31,8 @@ Header: `Authorization: Bearer $API_KEY`
 
 ```json
 {
-  "url": "https://cdn.example.com/shots/2025/01/15/ab12cd.png",
-  "key": "shots/2025/01/15/ab12cd.png",
+  "url": "https://cdn.example.com/shot_api/2025/01/15/ab12cd.png",
+  "key": "shot_api/2025/01/15/ab12cd.png",
   "content_type": "image/png",
   "size_bytes": 84213,
   "duration_ms": 2100
