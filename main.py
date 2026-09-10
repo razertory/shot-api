@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import mimetypes
 import shutil
 import time
 from contextlib import asynccontextmanager
@@ -12,8 +13,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field, HttpUrl
 
 from config import Settings, load_settings
+from favicon import favicon_key, fetch_favicon
 from runner import ShotError, ShotParams, take_shot
-from storage import upload
+from storage import upload, upload_bytes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("shot-api")
@@ -117,6 +119,7 @@ class ShotResponse(BaseModel):
             "examples": [
                 {
                     "url": "https://cdn.example.com/shot_api/2026/09/10/ab12cd.png",
+                    "favicon_url": "https://cdn.example.com/shot_api/favicons/9f86d08.ico",
                     "key": "shot_api/2026/09/10/ab12cd.png",
                     "content_type": "image/png",
                     "size_bytes": 263816,
@@ -127,6 +130,7 @@ class ShotResponse(BaseModel):
     }
 
     url: str = Field(description="图片公开 URL")
+    favicon_url: Optional[str] = Field(None, description="目标网站 favicon 的公开 URL（抓取失败为 null）")
     key: str = Field(description="R2 对象 key")
     content_type: str = Field(description="MIME 类型")
     size_bytes: int = Field(description="文件大小（字节）")
@@ -204,10 +208,24 @@ async def shot(req: ShotRequest):
     finally:
         shutil.rmtree(result.file_path.parent, ignore_errors=True)
 
+    favicon_url = None
+    content, ext = await fetch_favicon(str(req.url))
+    if content and ext:
+        try:
+            favicon_url = await upload_bytes(
+                content,
+                favicon_key(content, ext),
+                mimetypes.types_map.get(ext, "image/x-icon"),
+                settings,
+            )
+        except Exception:
+            log.warning("favicon upload failed for %s", req.url, exc_info=True)
+
     duration_ms = int((time.monotonic() - started) * 1000)
     log.info("shot %s -> %s (%d bytes, %d ms)", req.url, key, size, duration_ms)
     return ShotResponse(
         url=url,
+        favicon_url=favicon_url,
         key=key,
         content_type=result.content_type,
         size_bytes=size,

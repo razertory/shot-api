@@ -3,3 +3,4 @@ uvicorn[standard]>=0.29
 shot-scraper>=1.4
 boto3>=1.34
 pydantic>=2.6
+httpx>=0.27
