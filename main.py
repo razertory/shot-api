@@ -53,7 +53,7 @@ def get_settings() -> Settings:
 
 
 async def require_auth(creds: Optional[HTTPAuthorizationCredentials] = Security(bearer)):
-    if settings.api_key and (creds is None or creds.credentials != settings.api_key):
+    if creds is None or creds.credentials != settings.api_key:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "invalid or missing API key")
 
 

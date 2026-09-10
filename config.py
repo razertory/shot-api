@@ -20,7 +20,7 @@ class Settings:
     public_base_url: str      # e.g. https://cdn.example.com  (bucket custom domain, no trailing slash)
 
     # API
-    api_key: str              # Bearer token; empty string disables auth (not recommended)
+    api_key: str              # Bearer token (required)
 
     # Limits
     max_concurrency: int
@@ -39,7 +39,7 @@ def load_settings() -> Settings:
         s3_secret_key=_require("S3_SECRET_KEY"),
         s3_region=os.environ.get("S3_REGION", "auto"),
         public_base_url=_require("PUBLIC_BASE_URL").rstrip("/"),
-        api_key=os.environ.get("API_KEY", ""),
+        api_key=_require("API_KEY"),
         max_concurrency=int(os.environ.get("MAX_CONCURRENCY", "4")),
         default_timeout=int(os.environ.get("DEFAULT_TIMEOUT", "30")),
         max_timeout=int(os.environ.get("MAX_TIMEOUT", "120")),
