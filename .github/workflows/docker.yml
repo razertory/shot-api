@@ -45,3 +45,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Trigger deploy
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          curl -fsS -X POST "${{ secrets.DEPLOY_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "X-Deploy-Token: ${{ secrets.DEPLOY_SECRET }}" \
+            -d '{"app":"shot_api"}'
