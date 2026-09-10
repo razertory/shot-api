@@ -1,7 +1,10 @@
 FROM python:3.12-slim
 
 # shot-scraper needs Playwright's Chromium
-RUN pip install --no-cache-dir shot-scraper && shot-scraper install --with-deps
+RUN pip install --no-cache-dir shot-scraper \
+    && shot-scraper install \
+    && playwright install-deps chromium \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY requirements.txt .
