@@ -23,8 +23,8 @@ class ShotError(Exception):
 class ShotParams:
     url: str
     format: str = "png"            # png | jpeg | pdf
-    width: Optional[int] = None
-    height: Optional[int] = None      # None => full page (not for pdf)
+    width: Optional[int] = 1280       # 视口宽度；API 层必填，这里的默认值仅作兜底
+    height: Optional[int] = 800       # 视口高度；None => full page (not for pdf)
     selectors: Optional[List[str]] = None
     selector_all: Optional[str] = None
     js: Optional[str] = None
@@ -66,8 +66,7 @@ def build_command(params: ShotParams, output: Path) -> List[str]:
         return cmd
 
     cmd = ["shot-scraper", params.url, "-o", str(output)]
-    if params.width:
-        cmd += ["--width", str(params.width)]
+    cmd += ["--width", str(params.width or 1280)]
     if params.height:
         cmd += ["--height", str(params.height)]
     for sel in params.selectors or []:

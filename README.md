@@ -6,14 +6,16 @@
 
 ### `POST /shot`
 
-Header: `Authorization: Bearer $API_KEY`
+Header: `Authorization: Bearer ***
+
+`url`、`width`、`height` 为必填字段。
 
 ```json
 {
   "url": "https://example.com",
   "format": "png",          // png | jpeg | pdf
-  "width": 1280,
-  "height": 800,            // 省略 = 全页截图
+  "width": 1280,            // 必填，100–4000
+  "height": 800,            // 必填，100–20000
   "selectors": ["#main"],   // 只截取匹配元素的区域
   "selector_all": ".card",
   "js": "document.body.style.background='pink'",
@@ -66,6 +68,7 @@ docker run --env-file .env -p 8000:8000 shot-api
 ## 说明
 
 - **并发**：`MAX_CONCURRENCY` 信号量限制同时运行的 Chromium 数量，超出的请求排队。
+- **尺寸**：`width` / `height` 必填（视口尺寸即截图尺寸），不再支持省略后全页截图；缺少时返回 422。
 - **SSRF**：默认拒绝解析到私有/保留 IP 的域名；`ALLOW_PRIVATE_IPS=true` 关闭（不建议）。
 - **R2 清理**：截图默认永久保存，建议在 R2 bucket 配 lifecycle 规则自动删除（如 7 天）。
 - **Caddy**：可反代到本服务，例如 `shot.example.com { reverse_proxy 127.0.0.1:8000 }`。

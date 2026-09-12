@@ -58,34 +58,48 @@ async def require_auth(creds: Optional[HTTPAuthorizationCredentials] = Security(
 
 
 class ShotRequest(BaseModel):
-    """截图请求。唯一必填字段是 `url`。"""
+    """截图请求。必填字段：`url`、`width`、`height`。"""
 
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
-                    "summary": "最简请求（全页 PNG）",
-                    "value": {"url": "https://github.com/razertory"},
+                    "summary": "最简请求（1280x800 PNG）",
+                    "value": {"url": "https://github.com/razertory", "width": 1280, "height": 800},
                 },
                 {
                     "summary": "JPEG 缩略图（省流量）",
-                    "value": {"url": "https://example.com", "format": "jpeg", "quality": 70, "width": 800},
+                    "value": {
+                        "url": "https://example.com",
+                        "format": "jpeg",
+                        "quality": 70,
+                        "width": 800,
+                        "height": 600,
+                    },
                 },
                 {
                     "summary": "截取指定元素 + 高清",
-                    "value": {"url": "https://example.com", "selectors": ["#main"], "retina": True},
+                    "value": {
+                        "url": "https://example.com",
+                        "width": 1280,
+                        "height": 800,
+                        "selectors": ["#main"],
+                        "retina": True,
+                    },
                 },
                 {
                     "summary": "等待异步内容后截图",
                     "value": {
                         "url": "https://example.com/dashboard",
+                        "width": 1440,
+                        "height": 900,
                         "wait_for": "document.querySelector('#chart svg')",
                         "timeout": 60,
                     },
                 },
                 {
                     "summary": "存为 PDF",
-                    "value": {"url": "https://example.com", "format": "pdf"},
+                    "value": {"url": "https://example.com", "width": 1280, "height": 800, "format": "pdf"},
                 },
             ]
         }
@@ -93,8 +107,8 @@ class ShotRequest(BaseModel):
 
     url: HttpUrl = Field(description="目标页面 URL（http/https；默认拦截内网地址）")
     format: Literal["png", "jpeg", "pdf"] = Field("png", description="输出格式")
-    width: Optional[int] = Field(None, ge=100, le=4000, description="视口宽度，默认 1280")
-    height: Optional[int] = Field(None, ge=100, le=20000, description="视口高度；省略 = 全页截图（pdf 除外）")
+    width: int = Field(..., ge=100, le=4000, description="视口宽度（必填）")
+    height: int = Field(..., ge=100, le=20000, description="视口高度（必填）")
     selectors: Optional[List[str]] = Field(
         None, description="CSS 选择器列表，只截取覆盖这些元素的最小区域", examples=[["#main", ".header"]]
     )
